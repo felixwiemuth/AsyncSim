@@ -37,11 +37,34 @@ public class FloodingSystem {
             network.addNode(t);
             tasks.add(t);
         }
-        for (int i = 1; i <= 9; i++) {
-            for (int j = 1; j <= 9; j++) {
+
+        int n = 9; // number of nodes
+                
+        /**
+         * Topology: Ring
+         */
+        
+        for (int i = 1; i <= n; i++) {
+            int h = i-1;
+            int j = i+1;
+            if(h == 0) h = n;
+            if(j == n+1) j = 1;
+            network.addLink(i, h, new FixedDuration(1));
+            network.addLink(i, j, new FixedDuration(1));
+            //simulator.log("Added link between: " + i + "-" + h + ", " + i + "-" + j);
+        }
+        
+        /*
+         * Topology: Fully linked
+         */
+        
+        /*
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
                 network.addLink(i, j, new FixedDuration(i * j));
             }
         }
+        */
 
         tasks.get(0).addMsg(new Message(0, 1, "0"));
         tasks.get(0).schedule();
