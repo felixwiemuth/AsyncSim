@@ -58,6 +58,10 @@ public class Network {
         return neighbors;
     }
 
+    public int size() {
+        return tasks.size();
+    }
+
     public void sendMsg(final Message msg) {
         if (connections.get(msg.getDest()) != null && connections.get(msg.getSrc()).containsKey(msg.getDest())) { // check whether link exists
             simulator.addEvent(connections.get(msg.getSrc()).get(msg.getDest()).getDuration(), new Runnable() {
@@ -66,6 +70,12 @@ public class Network {
                     tasks.get(msg.getDest()).addMsg(msg);
                 }
             });
+        }
+    }
+
+    public void initTasks() {
+        for (Task task : tasks.values()) {
+            task.onInit();
         }
     }
 }

@@ -21,6 +21,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * @author Felix Wiemuth
@@ -99,6 +100,13 @@ public class Task {
     }
 
     /**
+     * Will be executed when the distributed system starts running.
+     */
+    protected void onInit() {
+
+    }
+
+    /**
      * Checks which guards are satisfied and runs one of those randomly.
      */
     public void schedule() {
@@ -120,6 +128,14 @@ public class Task {
 
     public int getId() {
         return id;
+    }
+
+    public Set<Integer> getNeighbors() {
+        return network.getNeighbors(getId());
+    }
+
+    public Set<Integer> getNeighbors(int src) {
+        return network.getNeighbors(src);
     }
 
     public void addMsg(Message msg) {
@@ -144,6 +160,6 @@ public class Task {
     }
 
     protected void log(String msg) {
-        simulator.log(msg);
+        simulator.log(String.format("%2d: %s", getId(), msg));
     }
 }
