@@ -46,8 +46,6 @@ public class LoadGeneratorTask extends Task {
             @Override
             public void run() {
                 pollMsg();
-//                List<Integer> neighbors = new ArrayList(getNeighbors());
-//                Collections.shuffle(neighbors);
                 int loadReceiver = simulator.getRandom().nextInt(getNeighbors().size() - 1) + 1;
                 log("Sending load to " + loadReceiver);
                 sendMsg(loadReceiver, "load");
@@ -56,14 +54,4 @@ public class LoadGeneratorTask extends Task {
         }
         ));
     }
-
-    @Override
-    protected void onInit() {
-        if (getId() == 1) {
-            for (int dest : getNeighbors()) {
-                sendMsg(dest, "token");
-            }
-        }
-    }
-
 }
