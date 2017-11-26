@@ -46,11 +46,11 @@ public class TokenRingSystem {
 
         // Connect load generator to all other nodes
         for (int i = 1; i <= n; i++) {
-            network.addLink(0, i, new FixedDuration(0));
+            network.addLink(0, i, new Link(0));
         }
 
         // Connect load generator to itself, where the transport duration equals the interval between two laods being sent to the other nodes
-        network.addLink(0, 0, new FixedDuration(25));
+        network.addLink(0, 0, new Link(25));
 
         network.initTasks();
         tasks.get(n).addMsg(new Message(0, 1, "genLoad"));

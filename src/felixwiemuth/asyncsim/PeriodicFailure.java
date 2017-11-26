@@ -18,25 +18,31 @@
 package felixwiemuth.asyncsim;
 
 /**
- * Generates different topologies in networks.
+ * Drops every k'th message.
  *
  * @author Felix Wiemuth
  */
-public class Topology {
+public class PeriodicFailure implements Link.MsgFailure {
 
-    public static void linkFully(Network network, int duration) {
-        for (int i = 1; i <= network.size(); i++) {
-            for (int j = 1; j <= network.size(); j++) {
-                network.addLink(i, j, new Link(duration));
-            }
-        }
+    private final int interval;
+    private int cnt = 0;
+
+    /**
+     *
+     * @param interval time between two failures
+     */
+    public PeriodicFailure(int interval) {
+        this.interval = interval;
     }
 
-    public static void addRing(Network network, int duration) {
-        for (int i = 1; i < network.size(); i++) {
-            network.addLink(i, i + 1, new Link(duration));
-            network.addLink(network.size(), 1, new Link(duration));
+    @Override
+    public boolean isFailure(Message msg) {
+        if (cnt == interval) {
+            cnt = 0;
+            return true;
+        } else {
+            cnt++;
+            return false;
         }
     }
-
 }

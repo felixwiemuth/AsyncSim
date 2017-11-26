@@ -31,7 +31,7 @@ public class Network {
 
     Map<Integer, Task> tasks = new HashMap<>();
     // ID (source) -> (ID (dest) -> Duration (link delay))
-    Map<Integer, Map<Integer, Duration>> connections = new HashMap<>();
+    Map<Integer, Map<Integer, Link>> connections = new HashMap<>();
 
     public Network(Simulator simulator) {
         this.simulator = simulator;
@@ -41,13 +41,13 @@ public class Network {
         tasks.put(task.getId(), task);
     }
 
-    public void addLink(int src, int dest, Duration duration) {
-        Map<Integer, Duration> map = connections.get(src);
+    public void addLink(int src, int dest, Link link) {
+        Map<Integer, Link> map = connections.get(src);
         if (map == null) {
             map = new HashMap<>();
             connections.put(src, map);
         }
-        map.put(dest, duration);
+        map.put(dest, link);
     }
 
     public Set<Integer> getNeighbors(int src) {
@@ -64,12 +64,10 @@ public class Network {
 
     public void sendMsg(final Message msg) {
         if (connections.get(msg.getDest()) != null && connections.get(msg.getSrc()).containsKey(msg.getDest())) { // check whether link exists
-            simulator.addEvent(connections.get(msg.getSrc()).get(msg.getDest()).getDuration(), new Runnable() {
-                @Override
-                public void run() {
-                    tasks.get(msg.getDest()).addMsg(msg);
-                }
-            });
+            String logEntry = connections.get(msg.getSrc()).get(msg.getDest()).sendMsg(simulator, msg, tasks.get(msg.getDest()));
+            if (logEntry != null) {
+                simulator.log(logEntry);
+            }
         }
     }
 
