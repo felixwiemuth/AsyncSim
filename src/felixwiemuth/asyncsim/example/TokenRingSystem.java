@@ -35,7 +35,7 @@ public class TokenRingSystem {
         List<Task> tasks = new ArrayList<>();
 
         for (int i = 1; i <= n; i++) {
-            Task t = new TokenRingTask(i, 0, simulator, network, 10);
+            Task t = new TokenRingTask(i, 0, simulator, network, 1);
             network.addNode(t);
             tasks.add(t);
         }

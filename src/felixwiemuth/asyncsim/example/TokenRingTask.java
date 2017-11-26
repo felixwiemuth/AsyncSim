@@ -61,7 +61,7 @@ public class TokenRingTask extends Task {
             @Override
             public boolean check() {
                 Message m = peekMsg();
-                return m != null && m.getSrc() != LOAD_GENERATOR && m.getData().equals("token");
+                return crNeeded && m != null && m.getSrc() != LOAD_GENERATOR && m.getData().equals("token");
             }
         },
                 new Action(new FixedDuration(delay)) {
@@ -69,10 +69,29 @@ public class TokenRingTask extends Task {
             public void run() {
                 pollMsg();
                 log("Received token");
-                if (crNeeded) {
-                    log("Doing something in critical region");
-                    crNeeded = false;
-                }
+                log("Doing something in critical region");
+                crNeeded = false;
+                // Send token to first neighbor
+                int tokenReceiver = getNeighbors().iterator().next();
+                log("Sending token to " + tokenReceiver);
+                sendMsg(tokenReceiver, "token");
+            }
+        }
+        ));
+
+        addCmd(new Task.Command(
+                new Guard() {
+            @Override
+            public boolean check() {
+                Message m = peekMsg();
+                return !crNeeded && m != null && m.getSrc() != LOAD_GENERATOR && m.getData().equals("token");
+            }
+        },
+                new Action(new FixedDuration(delay)) {
+            @Override
+            public void run() {
+                pollMsg();
+                log("Received token");
                 // Send token to first neighbor
                 int tokenReceiver = getNeighbors().iterator().next();
                 log("Sending token to " + tokenReceiver);
@@ -86,6 +105,7 @@ public class TokenRingTask extends Task {
     protected void onInit() {
         if (getId() == 1) {
             for (int dest : getNeighbors()) {
+                log("Sending initial token to " + dest);
                 sendMsg(dest, "token");
             }
         }
