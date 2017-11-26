@@ -24,6 +24,12 @@ import java.util.Queue;
 import java.util.Set;
 
 /**
+ * A program consisting of {@link Guard}s and {@link Action}s. When in
+ * {@link State#ALIVE} state will execute the corresponding action whenever a
+ * guard is true. When state is set to {@link State#DEAD} while an action is
+ * running, the action will be aborted without any effects of its so far
+ * execution being visible.
+ *
  * @author Felix Wiemuth
  */
 public class Task {
@@ -70,20 +76,34 @@ public class Task {
             simulator.addEvent(action.getDuration(), new Runnable() {
                 @Override
                 public void run() {
-                    action.run();
-                    busy = false;
-                    msgQueue.addAll(busyMsgQueue);
-                    busyMsgQueue.clear();
-                    schedule();
+                    if (state == State.ALIVE) {
+                        action.run();
+                        busy = false;
+                        msgQueue.addAll(busyMsgQueue);
+                        busyMsgQueue.clear();
+                        schedule();
+                    } // if task died while executing the action, it won't be performed
                 }
             });
             busy = true;
         }
     }
 
+    public static enum State {
+        /**
+         * The link delivers all messages.
+         */
+        ALIVE,
+        /**
+         * The link does not deliver any messages.
+         */
+        DEAD
+    }
+
     private final int id;
     private final Simulator simulator;
     private final Network network;
+    private State state = State.ALIVE;
     private final Queue<Message> msgQueue = new ArrayDeque<>(); // message queue as visible to the task
     private final Queue<Message> busyMsgQueue = new ArrayDeque<>(); // queue for messages received during the execution of an action
     private final List<Command> commands = new ArrayList<>();
@@ -106,11 +126,20 @@ public class Task {
 
     }
 
+    public void setState(State state) {
+        this.state = state;
+        if (state == State.ALIVE) {
+            schedule();
+        } else {
+            busy = false;
+        }
+    }
+
     /**
      * Checks which guards are satisfied and runs one of those randomly.
      */
     public void schedule() {
-        if (busy) {
+        if (busy || state == State.DEAD) {
             return;
         }
         List<Command> canRun = new ArrayList<>();
@@ -139,12 +168,14 @@ public class Task {
     }
 
     public void addMsg(Message msg) {
-        if (busy) {
-            busyMsgQueue.add(msg);
-        } else {
-            msgQueue.add(msg);
-            schedule();
-        }
+        if (state == State.ALIVE) {
+            if (busy) {
+                busyMsgQueue.add(msg);
+            } else {
+                msgQueue.add(msg);
+                schedule();
+            }
+        } // else ignore message
     }
 
     protected Message peekMsg() {
