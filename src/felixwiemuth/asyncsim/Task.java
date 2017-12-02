@@ -43,8 +43,16 @@ public class Task {
 
         private final Duration duration;
 
+        public Action() {
+            duration = null;
+        }
+
         public Action(Duration duration) {
             this.duration = duration;
+        }
+
+        public boolean hasDuration() {
+            return duration != null;
         }
 
         public long getDuration() {
@@ -73,7 +81,7 @@ public class Task {
         }
 
         public void run() {
-            simulator.addEvent(action.getDuration(), new Runnable() {
+            Runnable code = new Runnable() {
                 @Override
                 public void run() {
                     if (state == State.ALIVE) {
@@ -84,7 +92,12 @@ public class Task {
                         schedule();
                     } // if task died while executing the action, it won't be performed
                 }
-            });
+            };
+            if (action.hasDuration()) {
+                simulator.addEvent(action.getDuration(), code);
+            } else {
+                simulator.addEvent(code);
+            }
             busy = true;
         }
     }

@@ -28,14 +28,30 @@ public class Simulator {
     private final Log log;
     private final Random random = new Random();
     private long time = 0;
+    private final Duration defaultDuration;
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
     public Simulator(Log log) {
         this.log = log;
+        this.defaultDuration = new FixedDuration(0);
+    }
+
+    public Simulator(Log log, Duration defaultDuration) {
+        this.log = log;
+        this.defaultDuration = defaultDuration;
     }
 
     public void addEvent(long delay, Runnable runnable) {
         events.add(new Event(time + delay, runnable));
+    }
+
+    /**
+     * Add an event with default duration.
+     *
+     * @param runnable
+     */
+    public void addEvent(Runnable runnable) {
+        events.add(new Event(time + defaultDuration.getDuration(), runnable));
     }
 
     public boolean isFinished() {
