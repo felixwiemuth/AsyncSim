@@ -26,6 +26,8 @@ import java.util.Random;
 public class Simulator {
 
     private final Log log;
+    private boolean logMsgSent = false;
+    private boolean logMsgReceived = false;
     private final Random random = new Random();
     private long time = 0;
     private final Duration defaultDuration;
@@ -39,6 +41,14 @@ public class Simulator {
     public Simulator(Log log, Duration defaultDuration) {
         this.log = log;
         this.defaultDuration = defaultDuration;
+    }
+
+    public void setLogMsgSent(boolean logMsgSent) {
+        this.logMsgSent = logMsgSent;
+    }
+
+    public void setLogMsgReceived(boolean logMsgReceived) {
+        this.logMsgReceived = logMsgReceived;
     }
 
     public void addEvent(long delay, Runnable runnable) {
@@ -79,5 +89,17 @@ public class Simulator {
 
     public void log(String msg) {
         log.log(time, msg);
+    }
+
+    public void logMsgSent(Message msg) {
+        if (logMsgSent) {
+            log("MSG SNT " + msg.format());
+        }
+    }
+
+    public void logMsgReceived(Message msg) {
+        if (logMsgReceived) {
+            log("MSG RCV " + msg.format());
+        }
     }
 }

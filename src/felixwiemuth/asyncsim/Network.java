@@ -72,6 +72,8 @@ public class Network {
             String logEntry = connections.get(msg.getSrc()).get(msg.getDest()).sendMsg(simulator, msg, tasks.get(msg.getDest()));
             if (logEntry != null) {
                 simulator.log(logEntry);
+            } else {
+                simulator.logMsgSent(msg);
             }
         }
     }

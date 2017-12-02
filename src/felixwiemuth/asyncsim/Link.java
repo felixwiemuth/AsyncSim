@@ -105,6 +105,7 @@ public class Link {
                 @Override
                 public void run() {
                     dest.addMsg(msg);
+                    simulator.logMsgReceived(msg);
                 }
             });
             return null;

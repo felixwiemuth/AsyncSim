@@ -43,4 +43,8 @@ public class Message {
     public Object getData() {
         return data;
     }
+
+    public String format() {
+        return "[" + src + "->" + dest + "]: " + data;
+    }
 }
