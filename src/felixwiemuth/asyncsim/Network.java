@@ -50,6 +50,11 @@ public class Network {
         map.put(dest, link);
     }
 
+    public void addTwoWayLink(int src, int dest, Link link) {
+        addLink(src, dest, link);
+        addLink(dest, src, link);
+    }
+
     public Set<Integer> getNeighbors(int src) {
         Set<Integer> neighbors = connections.get(src).keySet();
         if (neighbors == null) {
