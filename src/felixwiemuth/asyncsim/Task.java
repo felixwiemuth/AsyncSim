@@ -36,6 +36,12 @@ public class Task {
 
     public interface Guard {
 
+        /**
+         * Returns true if the corresponding {@link Action} should be executed.
+         * Does not modify the state of a {@link Task}.
+         *
+         * @return
+         */
         boolean check();
     }
 
@@ -80,25 +86,8 @@ public class Task {
             return guard.check();
         }
 
-        public void run() {
-            Runnable code = new Runnable() {
-                @Override
-                public void run() {
-                    if (state == State.ALIVE) {
-                        action.run();
-                        busy = false;
-                        msgQueue.addAll(busyMsgQueue);
-                        busyMsgQueue.clear();
-                        schedule();
-                    } // if task died while executing the action, it won't be performed
-                }
-            };
-            if (action.hasDuration()) {
-                simulator.addEvent(action.getDuration(), code);
-            } else {
-                simulator.addEvent(code);
-            }
-            busy = true;
+        public Action getAction() {
+            return action;
         }
     }
 
@@ -120,6 +109,7 @@ public class Task {
     private final Queue<Message> msgQueue = new ArrayDeque<>(); // message queue as visible to the task
     private final Queue<Message> busyMsgQueue = new ArrayDeque<>(); // queue for messages received during the execution of an action
     private final List<Command> commands = new ArrayList<>();
+    private final List<Action> waitingActions = new ArrayList<>(); // actions waiting for execution (added by task itself)
     private boolean busy = false;
 
     public Task(int id, Simulator simulator, Network network) {
@@ -149,22 +139,42 @@ public class Task {
     }
 
     /**
-     * Checks which guards are satisfied and runs one of those randomly.
+     * Checks which guards are satisfied and randomly chooses one of those or a
+     * waiting action to run.
      */
     public void schedule() {
         if (busy || state == State.DEAD) {
             return;
         }
-        List<Command> canRun = new ArrayList<>();
+        List<Action> canRun = new ArrayList<>();
         for (Command cmd : commands) {
             if (cmd.canRun()) {
-                canRun.add(cmd);
+                canRun.add(cmd.getAction());
             }
         }
+        canRun.addAll(waitingActions);
         if (!canRun.isEmpty()) {
             // Choose one command of those in canRun randomly
-            Command cmd = canRun.get(simulator.getRandom().nextInt(canRun.size()));
-            cmd.run();
+            Action action = canRun.get(simulator.getRandom().nextInt(canRun.size()));
+            waitingActions.remove(action); // remove action from list of waiting actions if it was chosen from there
+            Runnable code = new Runnable() {
+                @Override
+                public void run() {
+                    if (state == State.ALIVE) {
+                        action.run();
+                        busy = false;
+                        msgQueue.addAll(busyMsgQueue);
+                        busyMsgQueue.clear();
+                        schedule();
+                    } // if task died while executing the action, it won't be performed
+                }
+            };
+            if (action.hasDuration()) {
+                simulator.addEvent(action.getDuration(), code);
+            } else {
+                simulator.addEvent(code);
+            }
+            busy = true;
         }
     }
 
@@ -201,6 +211,23 @@ public class Task {
 
     protected void sendMsg(int dest, Object data) {
         network.sendMsg(new Message(id, dest, data));
+    }
+
+    /**
+     * Schedule an {@link Action} to be executed by this task after a given
+     * delay.
+     *
+     * @param action
+     * @param delay
+     */
+    protected void scheduleAction(Action action, Duration delay) {
+        simulator.addEvent(delay.getDuration(), new Runnable() {
+            @Override
+            public void run() {
+                waitingActions.add(action);
+                schedule();
+            }
+        });
     }
 
     protected void log(String msg) {
