@@ -39,7 +39,7 @@ public class FloodingSystem {
         }
         for (int i = 1; i <= 9; i++) {
             for (int j = 1; j <= 9; j++) {
-                network.addLink(i, j, new FixedDuration(i * j));
+                network.addLink(i, j, new Link(i * j));
             }
         }
 
