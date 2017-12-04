@@ -41,7 +41,7 @@ public class SandboxChild extends Task {
         addCmd(new Command(new Guard() {
             @Override
             public boolean check() {
-                return peekMsg() != null && peekMsg().getData() == "Get ready";
+                return nextMsgEquals("Get ready");
             }
         }, new Action() {
             @Override
@@ -57,7 +57,7 @@ public class SandboxChild extends Task {
         addCmd(new Command(new Guard() {
             @Override
             public boolean check() {
-                return peekMsg() != null && peekMsg().getSrc() == sandbox;
+                return nextMsgSrcIs(sandbox);
             }
         }, new Action() {
             @Override
@@ -73,7 +73,7 @@ public class SandboxChild extends Task {
         addCmd(new Command(new Guard() {
             @Override
             public boolean check() {
-                return peekMsg() != null && peekMsg().getData().equals("How many dirties?");
+                return nextMsgEquals("How many dirties?");
             }
         }, new Action() {
             @Override

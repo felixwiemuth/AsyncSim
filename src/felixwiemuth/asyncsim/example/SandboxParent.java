@@ -57,7 +57,7 @@ public class SandboxParent extends Task {
         addCmd(new Command(new Guard() {
             @Override
             public boolean check() {
-                return peekMsg() != null;
+                return hasMsg();
             }
         }, new Action() {
             @Override
