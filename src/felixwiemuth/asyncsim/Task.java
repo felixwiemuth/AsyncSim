@@ -21,6 +21,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -240,6 +241,10 @@ public class Task {
                 schedule();
             }
         });
+    }
+
+    protected Random getRandom() {
+        return simulator.getRandom();
     }
 
     protected void log(String msg) {
