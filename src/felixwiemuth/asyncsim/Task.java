@@ -218,6 +218,10 @@ public class Task {
         return peekMsg() != null && peekMsg().getData().equals(o);
     }
 
+    protected boolean nextMsgNotEquals(Object o) {
+        return peekMsg() != null && !peekMsg().getData().equals(o);
+    }
+
     protected boolean nextMsgSrcIs(int src) {
         return peekMsg() != null && peekMsg().getSrc() == src;
     }
