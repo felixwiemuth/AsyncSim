@@ -209,6 +209,18 @@ public class Task {
         return msgQueue.poll();
     }
 
+    protected boolean hasMsg() {
+        return peekMsg() != null;
+    }
+
+    protected boolean nextMsgEquals(Object o) {
+        return peekMsg() != null && peekMsg().getData().equals(o);
+    }
+
+    protected boolean nextMsgSrcIs(int src) {
+        return peekMsg() != null && peekMsg().getSrc() == src;
+    }
+
     protected void sendMsg(int dest, Object data) {
         network.sendMsg(new Message(id, dest, data));
     }
